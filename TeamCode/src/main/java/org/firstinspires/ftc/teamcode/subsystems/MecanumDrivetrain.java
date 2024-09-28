@@ -5,17 +5,17 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
-import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.pathing.WayPoint;
 
-import java.util.Arrays;
-import java.util.List;
 @Config
-public class MecanumDrivetrain {
+public class MecanumDrivetrain implements Subsystem{
     MotorEx leftFront;
     MotorEx leftBack;
     MotorEx rightFront;
@@ -35,13 +35,22 @@ public class MecanumDrivetrain {
     Telemetry telemetry;
     FtcDashboard dashboard;
 
-    public void init(HardwareMap hwMap, Telemetry telemetry, FtcDashboard dashboard){
+    GoBildaPinpointDriver odometry;
+
+    public MecanumDrivetrain(HardwareMap hwMap, Telemetry telemetry, FtcDashboard dashboard){
         this.telemetry=telemetry;
         this.dashboard=dashboard;
         leftFront=new MotorEx(hwMap, "frontleft");
         leftBack=new MotorEx(hwMap, "backleft");
         rightFront=new MotorEx(hwMap, "frontright");
         rightBack=new MotorEx(hwMap, "backright");
+
+        odometry = hwMap.get(GoBildaPinpointDriver.class, "odo");
+        odometry.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD,
+                GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        odometry.setOffsets(100,  100);
+        odometry.setYawScalar(1);
+        odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
     }
 
     public void setRawPowers(double frontleft, double frontright, double backleft, double backright){
@@ -79,39 +88,35 @@ public class MecanumDrivetrain {
         setWeightedPowers(x, y, turnPower);
     }
     public void setTarget(WayPoint target){
-        translationalControllerX.setSetPoint(target.getPosition().getX());
-        translationalControllerY.setSetPoint(target.getPosition().getY());
-        headingController.setSetPoint(target.getPosition().getRotation().getRadians());
+        translationalControllerX.setSetPoint(target.getPosition().getX(DistanceUnit.INCH));
+        translationalControllerY.setSetPoint(target.getPosition().getY(DistanceUnit.INCH));
+        headingController.setSetPoint(target.getPosition().getHeading(AngleUnit.RADIANS));
 
-        translationalControllerX.setTolerance(target.getTolerance().getTranslation().getX());
-        translationalControllerY.setTolerance(target.getTolerance().getTranslation().getY());
-        headingController.setTolerance(target.getTolerance().getRotation().getRadians());
+        translationalControllerX.setTolerance(target.getTolerance().getX(DistanceUnit.INCH));
+        translationalControllerY.setTolerance(target.getTolerance().getY(DistanceUnit.INCH));
+        headingController.setTolerance(target.getTolerance().getHeading(AngleUnit.RADIANS));
     }
-    public void updateLocalizer() {
-        //localizer.updatePose();
-        Pose2d position=new Pose2d();
+    public void update() {
+        odometry.update();
+        Pose2D position= odometry.getPosition();
         telemetry.addLine(position.toString());
         telemetry.update();
         TelemetryPacket packet = new TelemetryPacket();
 
 
         packet.fieldOverlay().setFill("blue")
-                .strokeCircle(position.getX(), position.getY(), 9)
-                .strokeLine(position.getX(), position.getY(),
-                        (position.getRotation().getCos()*10)+ position.getX(),
-                        (position.getRotation().getSin()*10)+ position.getY());
+                .strokeCircle(position.getX(DistanceUnit.INCH), position.getY(DistanceUnit.INCH), 5)
+                .strokeLine(position.getX(DistanceUnit.INCH), position.getY(DistanceUnit.INCH),
+                        (Math.cos(position.getHeading(AngleUnit.RADIANS)*5))+ position.getX(DistanceUnit.INCH),
+                        (Math.sin(position.getHeading(AngleUnit.RADIANS))*5)+ position.getY(DistanceUnit.INCH));
 
         dashboard.sendTelemetryPacket(packet);
     }
-    public List<Double> getVelocity(){
-        List<Double> returning=Arrays.asList(rightBack.getVelocity(),
-                leftFront.getVelocity(),
-                rightFront.getVelocity());
-
-        return returning;
+    public Pose2D getVelocity(){
+        return odometry.getVelocity();
     }
     public void updatePIDS(){
-        double heading=new Pose2d().getRotation().getRadians();
+        double heading=odometry.getPosition().getHeading(AngleUnit.RADIANS);
         while (Math.abs(heading-headingController.getSetPoint())>Math.PI){
             if (heading<headingController.getSetPoint()){
                 heading=heading+2*Math.PI;
@@ -119,8 +124,8 @@ public class MecanumDrivetrain {
                 heading=heading-2*Math.PI;
             }
         }
-        double x_velo=translationalControllerX.calculate(new Pose2d().getX());
-        double y_velo=translationalControllerY.calculate(new Pose2d().getY());
+        double x_velo=translationalControllerX.calculate(odometry.getPosition().getX(DistanceUnit.INCH));
+        double y_velo=translationalControllerY.calculate(odometry.getPosition().getY(DistanceUnit.INCH));
         double heading_velo=headingController.calculate(heading);
         telemetry.addData("velocity x", x_velo);
         telemetry.addData("velocity y", y_velo);
@@ -141,5 +146,8 @@ public class MecanumDrivetrain {
     }
     public boolean atTarget(){
         return translationalControllerX.atSetPoint() && translationalControllerY.atSetPoint() && headingController.atSetPoint();
+    }
+    public void setPosition(Pose2D targetPosition){
+        odometry.setPosition(targetPosition);
     }
 }
