@@ -32,14 +32,10 @@ public class Teleop extends LinearOpMode {
                 outtake.closeClaw();
             }
             if (gamepad1.y){
-                intake.setExtended(true);
-                intake.setFlip(0.61);
-                intake.setPower(-0.7);
+                intake.intakePosition();
             }
             if (gamepad1.x){
-                intake.setExtended(false);
-                intake.setPower(0);
-                intake.setFlip(0.5);
+                intake.retract();
             }
             if (gamepad1.b){
                 outtake.transferPos();

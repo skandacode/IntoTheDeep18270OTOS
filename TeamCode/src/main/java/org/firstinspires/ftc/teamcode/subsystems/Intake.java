@@ -64,4 +64,14 @@ public class Intake implements Subsystem {
     public void setExtended(boolean extended) {
         isExtended = extended;
     }
+    public void intakePosition(){
+        setExtended(true);
+        setFlip(0.61);
+        setPower(-0.7);
+    }
+    public void retract(){
+        setExtended(false);
+        setPower(0);
+        setFlip(0.5);
+    }
 }
