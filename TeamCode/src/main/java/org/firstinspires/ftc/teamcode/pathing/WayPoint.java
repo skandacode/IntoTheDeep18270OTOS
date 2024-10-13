@@ -1,26 +1,24 @@
 package org.firstinspires.ftc.teamcode.pathing;
 
-import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Transform2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+
 public class WayPoint {
-    Pose2d position;
-    Transform2d tolerance;
-    public WayPoint(Pose2d pos, Transform2d tol){
+    Pose2D position;
+    Pose2D tolerance;
+
+    public WayPoint(Pose2D pos, Pose2D tolerance){
         this.position=pos;
-        this.tolerance=tol;
+        this.tolerance=tolerance;
     }
-    public WayPoint(Pose2d pos, double tol){
-        this.position=pos;
-        this.tolerance=new Transform2d(new Translation2d(tol, tol), Rotation2d.fromDegrees(tol));
-    }
-    public Pose2d getPosition(){
+    public Pose2D getPosition(){
         return position;
     }
-    public Transform2d getTolerance(){
+
+    public Pose2D getTolerance() {
         return tolerance;
     }
-
 }
