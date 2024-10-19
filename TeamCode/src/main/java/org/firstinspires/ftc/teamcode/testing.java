@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.hardware.CachedMotorEx;
 
 @Config
 @TeleOp
-@Disabled
 public class testing extends LinearOpMode {
     CachedMotorEx intakeMotor, extendoMotor, lift1, lift2;
     Servo intakeFlip1, intakeFlip2, depositFlip1, depositFlip2, wrist, claw;
@@ -24,11 +23,11 @@ public class testing extends LinearOpMode {
 
     public static double intakeFlip1Pos=0.5;
     public static double intakeFlip2Pos=0.5;
-    public static double depositFlip1Pos=0;
-    public static double depositFlip2Pos=0;
+    public static double depositFlip1Pos=0.4;
+    public static double depositFlip2Pos=0.6;
 
-    public static double wristPos=0;
-    public static double clawPos=0;
+    public static double wristPos=0.5;
+    public static double clawPos=0.78;
 
 
     @Override

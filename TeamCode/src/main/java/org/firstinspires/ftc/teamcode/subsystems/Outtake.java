@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -8,6 +9,10 @@ import org.firstinspires.ftc.teamcode.hardware.CachedMotorEx;
 public class Outtake implements Subsystem{
     private CachedMotorEx leftLift, rightLift;
     private Servo depositFlip1, depositFlip2, wrist, claw;
+
+    private int targetPos=0;
+
+    private PIDFController controller;
 
     public Outtake(HardwareMap hwMap){
         leftLift= new CachedMotorEx(hwMap, "leftSlideStack");
@@ -18,6 +23,12 @@ public class Outtake implements Subsystem{
 
         wrist=hwMap.servo.get("wrist");
         claw=hwMap.servo.get("claw");
+
+        leftLift.resetEncoder();
+
+        controller = new PIDFController(0.01, 0, 0, 0.08);
+
+        controller.setTolerance(10);
     }
 
     public void setPower(double power){
@@ -57,6 +68,19 @@ public class Outtake implements Subsystem{
 
     @Override
     public void update() {
+        double controller_output=controller.calculate(getLiftPos());
 
+        if (getLiftPos()>targetPos){
+            controller_output-=0.05;
+        }
+        if (getLiftPos()<targetPos){
+            controller_output+=0.05;
+        }
+
+        setPower(controller_output);
+
+    }
+    public boolean atTarget(){
+        return controller.atSetPoint();
     }
 }

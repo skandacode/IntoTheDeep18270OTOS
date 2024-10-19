@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 
 @TeleOp
 @Config
-public class Teleop extends LinearOpMode {
+public class TeleopManual extends LinearOpMode {
     Intake intake;
     Outtake outtake;
     public static double liftFF=0.08;
