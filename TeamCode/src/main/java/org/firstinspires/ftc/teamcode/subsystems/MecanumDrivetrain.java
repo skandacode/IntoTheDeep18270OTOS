@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -35,7 +36,9 @@ public class MecanumDrivetrain implements Subsystem{
     Telemetry telemetry;
     FtcDashboard dashboard;
 
-    GoBildaPinpointDriver odometry;
+    SparkFunOTOS odometry;
+
+    Pose2D position;
 
     public MecanumDrivetrain(HardwareMap hwMap, Telemetry telemetry, FtcDashboard dashboard){
         this.telemetry=telemetry;
@@ -45,12 +48,12 @@ public class MecanumDrivetrain implements Subsystem{
         rightFront=new MotorEx(hwMap, "frontright");
         rightBack=new MotorEx(hwMap, "backright");
 
-        odometry = hwMap.get(GoBildaPinpointDriver.class, "odo");
-        odometry.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD,
-                GoBildaPinpointDriver.EncoderDirection.FORWARD);
-        odometry.setOffsets(100,  100);
-        odometry.setYawScalar(1);
-        odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        odometry = hwMap.get(SparkFunOTOS.class, "otos");
+        //odometry.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD,
+        //        GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        //odometry.setOffsets(100,  100);
+        //odometry.setYawScalar(1);
+        //odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
     }
 
     public void setRawPowers(double frontleft, double frontright, double backleft, double backright){
@@ -97,8 +100,10 @@ public class MecanumDrivetrain implements Subsystem{
         headingController.setTolerance(target.getTolerance().getHeading(AngleUnit.RADIANS));
     }
     public void update() {
-        odometry.update();
-        Pose2D position= odometry.getPosition();
+        SparkFunOTOS.Pose2D rawposition= odometry.getPosition();
+
+        position=new Pose2D(DistanceUnit.INCH, rawposition.x, rawposition.y, AngleUnit.DEGREES, rawposition.h);
+
         telemetry.addLine(position.toString());
         telemetry.update();
         TelemetryPacket packet = new TelemetryPacket();
@@ -112,11 +117,11 @@ public class MecanumDrivetrain implements Subsystem{
 
         dashboard.sendTelemetryPacket(packet);
     }
-    public Pose2D getVelocity(){
+    public SparkFunOTOS.Pose2D getVelocity(){
         return odometry.getVelocity();
     }
     public void updatePIDS(){
-        double heading=odometry.getPosition().getHeading(AngleUnit.RADIANS);
+        double heading=position.getHeading(AngleUnit.RADIANS);
         while (Math.abs(heading-headingController.getSetPoint())>Math.PI){
             if (heading<headingController.getSetPoint()){
                 heading=heading+2*Math.PI;
@@ -124,8 +129,8 @@ public class MecanumDrivetrain implements Subsystem{
                 heading=heading-2*Math.PI;
             }
         }
-        double x_velo=translationalControllerX.calculate(odometry.getPosition().getX(DistanceUnit.INCH));
-        double y_velo=translationalControllerY.calculate(odometry.getPosition().getY(DistanceUnit.INCH));
+        double x_velo=translationalControllerX.calculate(position.getX(DistanceUnit.INCH));
+        double y_velo=translationalControllerY.calculate(position.getY(DistanceUnit.INCH));
         double heading_velo=headingController.calculate(heading);
         telemetry.addData("velocity x", x_velo);
         telemetry.addData("velocity y", y_velo);
@@ -147,7 +152,7 @@ public class MecanumDrivetrain implements Subsystem{
     public boolean atTarget(){
         return translationalControllerX.atSetPoint() && translationalControllerY.atSetPoint() && headingController.atSetPoint();
     }
-    public void setPosition(Pose2D targetPosition){
+    public void setPosition(SparkFunOTOS.Pose2D targetPosition){
         odometry.setPosition(targetPosition);
     }
 }
