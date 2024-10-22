@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -8,10 +10,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp
 public class OuttakeTesting extends LinearOpMode {
     Outtake outtake;
-
+    public static int targetPos = 0;
     @Override
     public void runOpMode() throws InterruptedException {
-        outtake = new Outtake(hardwareMap);
+        telemetry=new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        outtake = new Outtake(hardwareMap, telemetry);
         waitForStart();
         while (opModeIsActive()){
             if (gamepad1.a){
@@ -26,7 +29,10 @@ public class OuttakeTesting extends LinearOpMode {
             if (gamepad1.y){
                 outtake.scorePos();
             }
-            outtake.setPower(-gamepad1.left_stick_y+0.05);
+            outtake.setTargetPos(targetPos);
+            telemetry.addData("outtake pos", outtake.getLiftPos());
+            telemetry.update();
+            outtake.update();
         }
     }
 }

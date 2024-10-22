@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -13,14 +14,15 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.hardware.CachedMotorEx;
 import org.firstinspires.ftc.teamcode.pathing.WayPoint;
 
 @Config
 public class MecanumDrivetrain implements Subsystem{
-    MotorEx leftFront;
-    MotorEx leftBack;
-    MotorEx rightFront;
-    MotorEx rightBack;
+    CachedMotorEx leftFront;
+    CachedMotorEx leftBack;
+    CachedMotorEx rightFront;
+    CachedMotorEx rightBack;
     SimpleMotorFeedforward forwardFeedforward=new SimpleMotorFeedforward(0.085, 1);
     SimpleMotorFeedforward strafeFeedforward=new SimpleMotorFeedforward(0.22, 1);
     SimpleMotorFeedforward headingFeedforward=new SimpleMotorFeedforward(0.115, 1);
@@ -43,17 +45,27 @@ public class MecanumDrivetrain implements Subsystem{
     public MecanumDrivetrain(HardwareMap hwMap, Telemetry telemetry, FtcDashboard dashboard){
         this.telemetry=telemetry;
         this.dashboard=dashboard;
-        leftFront=new MotorEx(hwMap, "frontleft");
-        leftBack=new MotorEx(hwMap, "backleft");
-        rightFront=new MotorEx(hwMap, "frontright");
-        rightBack=new MotorEx(hwMap, "backright");
+        leftFront=new CachedMotorEx(hwMap, "frontleft");
+        leftBack=new CachedMotorEx(hwMap, "backleft");
+        rightFront=new CachedMotorEx(hwMap, "frontright");
+        rightBack=new CachedMotorEx(hwMap, "backright");
+        leftFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        leftBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
 
         odometry = hwMap.get(SparkFunOTOS.class, "otos");
-        //odometry.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD,
-        //        GoBildaPinpointDriver.EncoderDirection.FORWARD);
-        //odometry.setOffsets(100,  100);
-        //odometry.setYawScalar(1);
-        //odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        odometry.calibrateImu();
+        odometry.setAngularScalar(1);
+        odometry.setLinearScalar(1);
+        odometry.setLinearUnit(DistanceUnit.INCH);
+        odometry.setAngularUnit(AngleUnit.DEGREES);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
+        odometry.setOffset(offset);
+        odometry.resetTracking();
+
+        odometry.setPosition(new SparkFunOTOS.Pose2D());
     }
 
     public void setRawPowers(double frontleft, double frontright, double backleft, double backright){
@@ -68,8 +80,8 @@ public class MecanumDrivetrain implements Subsystem{
 
         }
         leftFront.set(-frontleft);
-        leftBack.set(-backleft);
-        rightFront.set(frontright);
+        leftBack.set(backleft);
+        rightFront.set(-frontright);
         rightBack.set(backright);
     }
     public void setWeightedPowers(double front, double strafe, double heading){
@@ -101,14 +113,11 @@ public class MecanumDrivetrain implements Subsystem{
     }
     public void update() {
         SparkFunOTOS.Pose2D rawposition= odometry.getPosition();
-
         position=new Pose2D(DistanceUnit.INCH, rawposition.x, rawposition.y, AngleUnit.DEGREES, rawposition.h);
 
         telemetry.addLine(position.toString());
         telemetry.update();
         TelemetryPacket packet = new TelemetryPacket();
-
-
         packet.fieldOverlay().setFill("blue")
                 .strokeCircle(position.getX(DistanceUnit.INCH), position.getY(DistanceUnit.INCH), 5)
                 .strokeLine(position.getX(DistanceUnit.INCH), position.getY(DistanceUnit.INCH),

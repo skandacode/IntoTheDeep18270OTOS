@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.CachedMotorEx;
 
 public class Outtake implements Subsystem{
@@ -12,9 +13,12 @@ public class Outtake implements Subsystem{
 
     private int targetPos=0;
 
-    private PIDFController controller;
+    public enum possibleHeights {HIGHBASKET, LOWBASKET, HIGHSPECIMEN, LOWSPECIMEN, HUMANPLAYER}
 
-    public Outtake(HardwareMap hwMap){
+    private PIDFController controller;
+    Telemetry telemetry;
+
+    public Outtake(HardwareMap hwMap, Telemetry telemetry){
         leftLift= new CachedMotorEx(hwMap, "leftSlideStack");
         rightLift= new CachedMotorEx(hwMap, "rightSlideStack");
 
@@ -26,9 +30,11 @@ public class Outtake implements Subsystem{
 
         leftLift.resetEncoder();
 
-        controller = new PIDFController(0.01, 0, 0, 0.08);
+        controller = new PIDFController(0.01, 0, 0, 0);
 
         controller.setTolerance(10);
+
+        this.telemetry=telemetry;
     }
 
     public void setPower(double power){
@@ -37,7 +43,7 @@ public class Outtake implements Subsystem{
     }
 
     public int getLiftPos(){
-        return leftLift.getCurrentPosition();
+        return -rightLift.getCurrentPosition();
     }
 
     public void openClaw(){
@@ -58,11 +64,13 @@ public class Outtake implements Subsystem{
     }
 
     public void transferPos(){
-        setFlipPos(0.96);
+        setFlipPos(0.885);
+        setWristPos(0.08);
         openClaw();
     }
     public void scorePos(){
         setFlipPos(0.4);
+        setWristPos(0.7);
         closeClaw();
     }
 
@@ -70,17 +78,22 @@ public class Outtake implements Subsystem{
     public void update() {
         double controller_output=controller.calculate(getLiftPos());
 
-        if (getLiftPos()>targetPos){
-            controller_output-=0.05;
-        }
-        if (getLiftPos()<targetPos){
-            controller_output+=0.05;
-        }
-
+//        if (getLiftPos()>targetPos){
+//            controller_output-=0.05;
+//        }
+//        else if (getLiftPos()<targetPos){
+//            controller_output+=0.05;
+//        }
+        telemetry.addData("Outtake applied power", controller_output);
         setPower(controller_output);
 
     }
     public boolean atTarget(){
         return controller.atSetPoint();
+    }
+
+    public void setTargetPos(int targetPos) {
+        this.targetPos = targetPos;
+        controller.setSetPoint(targetPos);
     }
 }
