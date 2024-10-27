@@ -57,7 +57,7 @@ public class TeleopManual extends LinearOpMode {
             intake.update();
             telemetry.addData("Intake extend Pos", intake.getExtendoMotorPos());
             telemetry.addData("Outtake extend Pos", outtake.getLiftPos());
-            telemetry.addData("intake color", intake.getColor());
+            telemetry.addData("intake color", intake.getRawSensorValues());
 
             telemetry.update();
         }

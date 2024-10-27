@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import android.graphics.Color;
+
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -114,7 +116,12 @@ public class Intake implements Subsystem {
     public boolean isDone() {
         return isDone;
     }
-
+    public int[] getRawSensorValues() {
+        return new int[]{intakecolor.red(), intakecolor.green(), intakecolor.blue()}; // Return RGB as an array
+    }
+    public double hue(){
+        return getHue(intakecolor.red(), intakecolor.green(), intakecolor.blue());
+    }
     public SampleColor getColor(){
         if (intakecolor.getDistance(DistanceUnit.CM)<4.5){
             int blueValue = intakecolor.blue();
@@ -129,5 +136,30 @@ public class Intake implements Subsystem {
         }else{
             return SampleColor.NONE;
         }
+    }
+    private float getHue(int r, int g, int b) {
+        // Normalize RGB values to [0, 1]
+        float rNorm = r / 255f;
+        float gNorm = g / 255f;
+        float bNorm = b / 255f;
+
+        // Find the max and min of the normalized values
+        float max = Math.max(rNorm, Math.max(gNorm, bNorm));
+        float min = Math.min(rNorm, Math.min(gNorm, bNorm));
+        float delta = max - min;
+
+        float hue;
+
+        if (delta == 0) {
+            // If delta is 0, the hue is undefined (achromatic)
+            hue = 0;
+        } else if (max == rNorm) {
+            hue = (60 * ((gNorm - bNorm) / delta) + 360) % 360;
+        } else if (max == gNorm) {
+            hue = (60 * ((bNorm - rNorm) / delta) + 120) % 360;
+        } else {
+            hue = (60 * ((rNorm - gNorm) / delta) + 240) % 360;
+        }
+        return hue;
     }
 }
