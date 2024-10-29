@@ -53,15 +53,14 @@ public class Intake implements Subsystem {
                 isDone=true;
             }
         } else{
-            if (getExtendoMotorPos()<-30){
-                setExtendo(1);
-                isDone=false;
-            }else{
+            if (intakeEnd.isPressed()){
                 setExtendo(0);
                 isDone=true;
+            }else{
+                setExtendo(1);
+                isDone=false;
             }
         }
-
     }
     public void setPower(double power){
         intakeMotor.setPower(-power);
@@ -75,9 +74,9 @@ public class Intake implements Subsystem {
     }
     public void setCover(boolean closed){
         if (closed){
-            cover.setPosition(0.91);
+            cover.setPosition(0.9);
         }else{
-            cover.setPosition(0.3);
+            cover.setPosition(0.25);
         }
     }
 
@@ -100,7 +99,7 @@ public class Intake implements Subsystem {
         setExtended(true);
         setCover(true);
         setFlip(0.61);
-        setPower(0.7);
+        setPower(1);
     }
     public void eject(){
         setCover(false);
@@ -119,47 +118,36 @@ public class Intake implements Subsystem {
     public int[] getRawSensorValues() {
         return new int[]{intakecolor.red(), intakecolor.green(), intakecolor.blue()}; // Return RGB as an array
     }
-    public double hue(){
-        return getHue(intakecolor.red(), intakecolor.green(), intakecolor.blue());
+    public double getDistance(){
+        return intakecolor.getDistance(DistanceUnit.CM);
     }
     public SampleColor getColor(){
-        if (intakecolor.getDistance(DistanceUnit.CM)<4.5){
+        if (intakecolor.getDistance(DistanceUnit.CM)<4){
+            /*
             int blueValue = intakecolor.blue();
             if (blueValue>180){
                 return SampleColor.BLUE;
             }
             int redValue = intakecolor.red();
-            if (redValue<215){
+            if (redValue<210){
                 return SampleColor.RED;
             }
             return SampleColor.YELLOW;
+             */
+            int[] rgbValues = getRawSensorValues();
+            if (rgbValues[0]>rgbValues[1] && rgbValues[0]>rgbValues[2]){
+                return SampleColor.RED;
+            }
+            if (rgbValues[1]>rgbValues[0] && rgbValues[1]>rgbValues[2]){
+                return SampleColor.YELLOW;
+            }
+            if (rgbValues[2]-100>rgbValues[1] && rgbValues[2]-100>rgbValues[0]){
+                return SampleColor.BLUE;
+            }
+
         }else{
             return SampleColor.NONE;
         }
-    }
-    private float getHue(int r, int g, int b) {
-        // Normalize RGB values to [0, 1]
-        float rNorm = r / 255f;
-        float gNorm = g / 255f;
-        float bNorm = b / 255f;
-
-        // Find the max and min of the normalized values
-        float max = Math.max(rNorm, Math.max(gNorm, bNorm));
-        float min = Math.min(rNorm, Math.min(gNorm, bNorm));
-        float delta = max - min;
-
-        float hue;
-
-        if (delta == 0) {
-            // If delta is 0, the hue is undefined (achromatic)
-            hue = 0;
-        } else if (max == rNorm) {
-            hue = (60 * ((gNorm - bNorm) / delta) + 360) % 360;
-        } else if (max == gNorm) {
-            hue = (60 * ((bNorm - rNorm) / delta) + 120) % 360;
-        } else {
-            hue = (60 * ((rNorm - gNorm) / delta) + 240) % 360;
-        }
-        return hue;
+        return SampleColor.NONE;
     }
 }

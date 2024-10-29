@@ -47,11 +47,15 @@ public class Outtake implements Subsystem{
     }
 
     public void openClaw(){
-        claw.setPosition(0.78);
+        claw.setPosition(0.84);
+    }
+    public void openClawWide(){
+        claw.setPosition(0.6);
     }
 
+
     public void closeClaw(){
-        claw.setPosition(0.92);
+        claw.setPosition(0.96);
     }
 
     public void setFlipPos(double pos){
@@ -64,14 +68,22 @@ public class Outtake implements Subsystem{
     }
 
     public void transferPos(){
-        setFlipPos(0.885);
-        setWristPos(0.08);
+        setFlipPos(0.84);
+        setWristPos(0.18);
         openClaw();
     }
+    public void resetEncoder(){
+        leftLift.resetEncoder();
+        rightLift.resetEncoder();
+    }
     public void scorePos(){
-        setFlipPos(0.4);
-        setWristPos(0.7);
+        setFlipPos(0.05);
+        setWristPos(0.50);
         closeClaw();
+    }
+    public void specimenDepo(){
+        setFlipPos(0.1);
+        setWristPos(0.91);
     }
 
     @Override
