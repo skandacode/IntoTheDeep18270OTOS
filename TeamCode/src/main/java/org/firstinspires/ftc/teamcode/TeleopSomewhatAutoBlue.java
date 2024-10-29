@@ -188,8 +188,8 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
             telemetry.addData("State sample", sampleMachine.getState());
             telemetry.addData("Specimen sample", specimenScorer.getState());
 
-            telemetry.addData("Intake color", Arrays.toString(intake.getRawSensorValues()));
-            telemetry.addData("Intake distance", intake.getDistance());
+            //telemetry.addData("Intake color", Arrays.toString(intake.getRawSensorValues()));
+            //telemetry.addData("Intake distance", intake.getDistance());
 
             telemetry.addData("Outtake Pos", outtake.getLiftPos());
 
