@@ -25,7 +25,7 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
     MecanumDrivetrain drive;
 
     private enum SampleStates {
-        IDLE, EXTEND, RETRACT, WAIT, CLOSE, LIFT, WRIST, OPEN, LOWERLIFT, EJECT
+        IDLE, EXTEND, RETRACT, OPENCOVER, WAIT, CLOSE, LIFT, WRIST, OPEN, LOWERLIFT, EJECT
     }
     private enum SpecimenScoreStates{IDLE, INTAKEPOS, INTAKE, CLOSE_CLAW, HOLD, SCORE, OPENCLAW, RETRACT}
     Intake.SampleColor targetColor = Intake.SampleColor.YELLOW;
@@ -74,9 +74,13 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
                 .state(SampleStates.RETRACT)
                 .onEnter(()->{
                     intake.retract();
+                    intake.setCover(true);
                     intake.setPower(0.15);
                     outtake.transferPos();
                 })
+                .transitionTimed(0.1)
+                .state(SampleStates.OPENCOVER)
+                .onEnter(()->intake.setCover(false))
                 .transition(()->intake.isDone())
 
                 .state(SampleStates.WAIT)
