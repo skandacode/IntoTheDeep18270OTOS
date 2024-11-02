@@ -27,7 +27,7 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
     private enum SampleStates {
         IDLE, EXTEND, RETRACT, WAIT, CLOSE, LIFT, WRIST, OPEN, LOWERLIFT, EJECT
     }
-    private enum SpecimenScoreStates{IDLE, INTAKEPOS, INTAKE, CLOSE_CLAW, LIFT, WRISTMOVE, LOWERLIFT, OPENCLAW, RETRACT}
+    private enum SpecimenScoreStates{IDLE, INTAKEPOS, INTAKE, CLOSE_CLAW, HOLD, SCORE, OPENCLAW, RETRACT}
     Intake.SampleColor targetColor = Intake.SampleColor.YELLOW;
 
     public static int targetLiftPosSample =2900;
@@ -99,7 +99,7 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
                     outtake.scorePos();
                     intake.setPower(0);
                 })
-                .transition(()->gamepad1.right_bumper)
+                .transition(()->gamepad1.left_bumper)
 
                 .state(SampleStates.OPEN)
                 .onEnter(()->outtake.openClaw())
@@ -128,24 +128,17 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
                     .state(SpecimenScoreStates.CLOSE_CLAW)
                     .onEnter(()->outtake.closeClaw())
                     .transitionTimed(0.3)
-                    .state(SpecimenScoreStates.LIFT)
-                    .onEnter(()->outtake.setTargetPos(1350))
-                    .transition(()-> (outtake.atTarget() && gamepad1.right_bumper))
-                    .state(SpecimenScoreStates.WRISTMOVE)
-                    .onEnter(()->outtake.specimenDepo())
-                    .transitionTimed(0.1)
-                    .state(SpecimenScoreStates.LOWERLIFT)
-                    .onEnter(()->outtake.setTargetPos(850))
+                    .state(SpecimenScoreStates.HOLD)
+                    .onEnter(()->outtake.specimenHoldPos())
+                    .transition(()-> (outtake.atTarget() && gamepad1.left_bumper))
+                    .state(SpecimenScoreStates.SCORE)
+                    .onEnter(()->outtake.specimenScorePos())
                     .transitionTimed(0.3)
                     .state(SpecimenScoreStates.OPENCLAW)
                     .onEnter(()-> outtake.openClaw())
                     .transitionTimed(0.2)
                     .state(SpecimenScoreStates.RETRACT)
-                    .onEnter(()->{
-                        outtake.setTargetPos(0);
-
-                        outtake.transferPos();
-                    })
+                    .onEnter(()->outtake.transferPos())
                     .transition(()-> outtake.atTarget(), SpecimenScoreStates.IDLE)
                     .build();
         waitForStart();
@@ -175,10 +168,10 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
                 }
             }
 
-            if (!gamepad1.left_bumper){
+            if (!gamepad1.right_bumper){
                 drive.setWeightedPowers(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
             }else{
-                drive.setWeightedPowers(-gamepad1.left_stick_y/3, -gamepad1.left_stick_x/3, -gamepad1.right_stick_x/5);
+                drive.setWeightedPowers(-gamepad1.left_stick_y/5, -gamepad1.left_stick_x/5, -gamepad1.right_stick_x/8);
             }
             sampleMachine.update();
             specimenScorer.update();

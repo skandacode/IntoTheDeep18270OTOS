@@ -53,7 +53,7 @@ public class Intake implements Subsystem {
                 isDone=true;
             }
         } else{
-            if (intakeEnd.isPressed()){
+            if (getExtendoMotorPos()>-10){
                 setExtendo(0);
                 isDone=true;
             }else{

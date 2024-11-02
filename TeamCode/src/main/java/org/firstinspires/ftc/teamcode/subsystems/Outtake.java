@@ -71,6 +71,7 @@ public class Outtake implements Subsystem{
         setFlipPos(0.84);
         setWristPos(0.18);
         openClaw();
+        setTargetPos(0);
     }
     public void resetEncoder(){
         leftLift.resetEncoder();
@@ -107,5 +108,17 @@ public class Outtake implements Subsystem{
     public void setTargetPos(int targetPos) {
         this.targetPos = targetPos;
         controller.setSetPoint(targetPos);
+    }
+    public void specimenHoldPos(){
+        setFlipPos(0.5);
+        closeClaw();
+        setWristPos(0.5);
+        setTargetPos(380);
+    }
+    public void specimenScorePos(){
+        setFlipPos(0.1);
+        setWristPos(0.5);
+        closeClaw();
+        setTargetPos(380);
     }
 }
