@@ -26,7 +26,7 @@ public class MecanumDrivetrainTesting extends LinearOpMode {
         intake= new Intake(hardwareMap);
 
         drive.setPosition(new Pose2D(DistanceUnit.INCH, 36, 0, AngleUnit.DEGREES, 90));
-        WayPoint point1=new WayPoint(new Pose2D(DistanceUnit.INCH, 36, 18, AngleUnit.DEGREES, 90),
+        WayPoint point1=new WayPoint(new Pose2D(DistanceUnit.INCH, 50, 18, AngleUnit.DEGREES, 90),
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
         WayPoint startPoint=new WayPoint(new Pose2D(DistanceUnit.INCH, 36, 0, AngleUnit.DEGREES, 90),
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));

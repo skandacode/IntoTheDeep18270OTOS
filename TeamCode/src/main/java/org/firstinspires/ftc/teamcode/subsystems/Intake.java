@@ -65,7 +65,7 @@ public class Intake implements Subsystem {
     public void setPower(double power){
         intakeMotor.setPower(-power);
     }
-    void setExtendo(double power){
+    public void setExtendo(double power){
         extendoMotor.setPower(power);
     }
     public void setFlip(double pos){
@@ -76,7 +76,7 @@ public class Intake implements Subsystem {
         if (closed){
             cover.setPosition(0.9);
         }else{
-            cover.setPosition(0.25);
+            cover.setPosition(0.08);
         }
     }
 
@@ -98,12 +98,12 @@ public class Intake implements Subsystem {
     public void intakePosition(){
         setExtended(true);
         setCover(true);
-        setFlip(0.61);
+        setFlip(0.31);
         setPower(1);
     }
     public void eject(){
         setCover(false);
-        setFlip(0.38);
+        setFlip(0.62);
     }
     public void retract(){
         setExtended(false);
