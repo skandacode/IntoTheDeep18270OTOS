@@ -11,6 +11,8 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.hardware.CachedMotorEx;
 
+import java.util.Arrays;
+
 public class Intake implements Subsystem {
     CachedMotorEx intakeMotor, extendoMotor;
     ServoImplEx intakeServoLeft, intakeServoRight;
@@ -20,6 +22,8 @@ public class Intake implements Subsystem {
 
     private boolean isExtended=false;
     private boolean isDone = true;
+
+    double intakeSpeed=0;
 
     public enum SampleColor {RED, BLUE, YELLOW, NONE}
 
@@ -54,7 +58,7 @@ public class Intake implements Subsystem {
             }
         } else{
             if (getExtendoMotorPos()>-10){
-                setExtendo(0);
+                setExtendo(0.2);
                 isDone=true;
             }else{
                 setExtendo(1);
@@ -64,6 +68,7 @@ public class Intake implements Subsystem {
     }
     public void setPower(double power){
         intakeMotor.setPower(-power);
+        intakeSpeed=power;
     }
     public void setExtendo(double power){
         extendoMotor.setPower(power);
@@ -122,32 +127,32 @@ public class Intake implements Subsystem {
         return intakecolor.getDistance(DistanceUnit.CM);
     }
     public SampleColor getColor(){
-        if (intakecolor.getDistance(DistanceUnit.CM)<4){
-            /*
-            int blueValue = intakecolor.blue();
-            if (blueValue>180){
-                return SampleColor.BLUE;
+        if (getDistance()<4){
+            for (int i=0; i<10; i++){
+                getRawSensorValues();
             }
-            int redValue = intakecolor.red();
-            if (redValue<210){
-                return SampleColor.RED;
-            }
-            return SampleColor.YELLOW;
-             */
             int[] rgbValues = getRawSensorValues();
-            if (rgbValues[0]>rgbValues[1] && rgbValues[0]>rgbValues[2]){
+            System.out.println(Arrays.toString(rgbValues));
+            int[] tweakedValues = new int[] {rgbValues[0]+50, rgbValues[1]-25, rgbValues[2]-100};
+            if (tweakedValues[0]>tweakedValues[1] && tweakedValues[0]>tweakedValues[2]){
+                System.out.println(Arrays.toString(tweakedValues)+" Red");
                 return SampleColor.RED;
             }
-            if (rgbValues[1]>rgbValues[0] && rgbValues[1]>rgbValues[2]){
+            if (tweakedValues[1]>tweakedValues[0] && tweakedValues[1]>tweakedValues[2]){
+                System.out.println(Arrays.toString(tweakedValues)+" Yellow");
                 return SampleColor.YELLOW;
             }
-            if (rgbValues[2]-100>rgbValues[1] && rgbValues[2]-100>rgbValues[0]){
+            if (tweakedValues[2]>tweakedValues[1] && tweakedValues[2]>tweakedValues[0]){
+                System.out.println(Arrays.toString(tweakedValues)+" Blue");
                 return SampleColor.BLUE;
             }
-
         }else{
             return SampleColor.NONE;
         }
         return SampleColor.NONE;
+    }
+
+    public double getIntakeSpeed() {
+        return intakeSpeed;
     }
 }

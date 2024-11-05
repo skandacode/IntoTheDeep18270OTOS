@@ -25,7 +25,7 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
     MecanumDrivetrain drive;
 
     private enum SampleStates {
-        IDLE, EXTEND, RETRACT, OPENCOVER, WAIT, CLOSE, LIFT, WRIST, OPEN, LOWERLIFT, EJECT
+        IDLE, EXTEND, DROP, SENSORWAIT, SENSE, RETRACT, OPENCOVER, WAIT, CLOSE, LIFT, WRIST, OPEN, LOWERLIFT, EJECT
     }
 
     private enum SpecimenScoreStates {IDLE, INTAKEPOS, INTAKE, CLOSE_CLAW, HOLD, SCORE, OPENCLAW, RETRACT}
@@ -56,25 +56,37 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
                     intake.setPower(0);
                 })
                 .transition(() -> gamepad1.y)
-
                 .state(SampleStates.EXTEND)
+                .onEnter(()->intake.setExtended(true))
+                .transitionTimed(0.1)
+                .state(SampleStates.DROP)
                 .onEnter(() -> intake.intakePosition())
                 .loop(()->{
-                    currentSense=intake.getColor();
-                })
-                .transition(() -> (currentSense == targetColor || currentSense== Intake.SampleColor.BLUE), SampleStates.RETRACT)
-                .transition(() -> {
-                            if (currentSense == Intake.SampleColor.NONE) {
-                                return false;
-                            } else {
-                                return currentSense != targetColor && currentSense != Intake.SampleColor.BLUE;
-                            }
+                    if (gamepad1.options){
+                        if (intake.getIntakeSpeed() != -1){
+                            intake.setPower(-1);
                         }
-                        , SampleStates.EJECT)
+                    }else{
+                        if (intake.getIntakeSpeed()==-1){
+                            intake.intakePosition();
+                        }
+                    }
+                })
+                .transition(()->intake.getDistance()<4)
+                .state(SampleStates.SENSORWAIT)
+                .onEnter(()->intake.intakePosition())
+                .transitionTimed(0.1)
+                .state(SampleStates.SENSE)
+                .transition(() -> {
+                    currentSense=intake.getColor();
+                    return currentSense == targetColor || currentSense== Intake.SampleColor.BLUE;
+                }, SampleStates.RETRACT)
+                .transition(()->currentSense == Intake.SampleColor.NONE, SampleStates.DROP)
+                .transition(() -> currentSense != targetColor && currentSense != Intake.SampleColor.BLUE, SampleStates.EJECT)
 
                 .state(SampleStates.EJECT, true)
                 .onEnter(() -> intake.eject())
-                .transitionTimed(0.7, SampleStates.EXTEND)
+                .transitionTimed(0.7, SampleStates.DROP)
 
                 .state(SampleStates.RETRACT)
                 .onEnter(() -> {
@@ -168,7 +180,7 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
                 }
             }
             if (gamepad1.x) {
-                if (sampleMachine.getState() == SampleStates.EXTEND) {
+                if (sampleMachine.getState() == SampleStates.EXTEND || sampleMachine.getState() == SampleStates.DROP) {
                     sampleMachine.setState(SampleStates.IDLE);
                     intake.retract();
                     intake.setPower(0);
@@ -191,7 +203,7 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
             specimenScorer.update();
             intake.update();
             outtake.update();
-            telemetry.addData("target color", targetColor);
+            telemetry.addData("target color", targetColor.toString());
             telemetry.addData("State sample", sampleMachine.getState());
             telemetry.addData("Specimen sample", specimenScorer.getState());
 
@@ -199,6 +211,7 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
             //telemetry.addData("Intake distance", intake.getDistance());
 
             telemetry.addData("Outtake Pos", outtake.getLiftPos());
+            telemetry.addData("Extendo Pos", intake.getExtendoMotorPos());
 
             long currLoop = System.nanoTime();
             telemetry.addData("Ms per loop", (currLoop - prevLoop) / 1000000);
