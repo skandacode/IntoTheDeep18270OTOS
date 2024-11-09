@@ -24,7 +24,7 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
     Intake intake;
     MecanumDrivetrain drive;
 
-    private enum SampleStates {
+    public enum SampleStates {
         IDLE, EXTEND, DROP, SENSORWAIT, SENSE, RETRACT, OPENCOVER, WAIT, CLOSE, LIFT, WRIST, OPEN, LOWERLIFT, EJECT
     }
 
@@ -32,7 +32,7 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
 
     Intake.SampleColor targetColor = Intake.SampleColor.YELLOW;
 
-    public static int targetLiftPosSample = 2900;
+    public static int targetLiftPosSample = 3000;
 
     public static Intake.SampleColor allianceColor= Intake.SampleColor.BLUE;
     Intake.SampleColor currentSense= Intake.SampleColor.NONE;
@@ -79,10 +79,10 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
                 .state(SampleStates.SENSE)
                 .transition(() -> {
                     currentSense=intake.getColor();
-                    return currentSense == targetColor || currentSense== Intake.SampleColor.BLUE;
+                    return currentSense == targetColor || currentSense== allianceColor;
                 }, SampleStates.RETRACT)
                 .transition(()->currentSense == Intake.SampleColor.NONE, SampleStates.DROP)
-                .transition(() -> currentSense != targetColor && currentSense != Intake.SampleColor.BLUE, SampleStates.EJECT)
+                .transition(() -> currentSense != targetColor && currentSense != allianceColor, SampleStates.EJECT)
 
                 .state(SampleStates.EJECT, true)
                 .onEnter(() -> intake.eject())
@@ -174,8 +174,8 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
             boolean currSampleColorToggle = gamepad1.dpad_down;
             if (currSampleColorToggle && !prevSampleColorToggle) {
                 if (targetColor == Intake.SampleColor.YELLOW) {
-                    targetColor = Intake.SampleColor.BLUE;
-                } else if (targetColor == Intake.SampleColor.BLUE) {
+                    targetColor = allianceColor;
+                } else if (targetColor == allianceColor) {
                     targetColor = Intake.SampleColor.YELLOW;
                 }
             }

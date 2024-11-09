@@ -23,9 +23,9 @@ public class MecanumDrivetrain implements Subsystem{
     CachedMotorEx leftBack;
     CachedMotorEx rightFront;
     CachedMotorEx rightBack;
-    SimpleMotorFeedforward forwardFeedforward=new SimpleMotorFeedforward(0.085, 1);
-    SimpleMotorFeedforward strafeFeedforward=new SimpleMotorFeedforward(0.22, 1);
-    SimpleMotorFeedforward headingFeedforward=new SimpleMotorFeedforward(0.115, 1);
+    SimpleMotorFeedforward forwardFeedforward=new SimpleMotorFeedforward(0.12, 1);
+    SimpleMotorFeedforward strafeFeedforward=new SimpleMotorFeedforward(0.26, 1);
+    SimpleMotorFeedforward headingFeedforward=new SimpleMotorFeedforward(0.135, 1);
 
     PIDFController translationalControllerY=new PIDFController(0.1, 0, 0.008, 0);
     PIDFController translationalControllerX=new PIDFController(
@@ -57,11 +57,11 @@ public class MecanumDrivetrain implements Subsystem{
 
         odometry = hwMap.get(SparkFunOTOS.class, "otos");
         odometry.calibrateImu();
-        odometry.setAngularScalar(1);
-        odometry.setLinearScalar(1);
+        odometry.setLinearScalar(1.0726534030253347);
+        odometry.setAngularScalar(0.9885441764832054);
         odometry.setLinearUnit(DistanceUnit.INCH);
         odometry.setAngularUnit(AngleUnit.DEGREES);
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 90);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(-5, 0, 90);
         odometry.setOffset(offset);
         odometry.resetTracking();
 
@@ -115,8 +115,7 @@ public class MecanumDrivetrain implements Subsystem{
         SparkFunOTOS.Pose2D rawposition= odometry.getPosition();
         position=new Pose2D(DistanceUnit.INCH, rawposition.x, rawposition.y, AngleUnit.DEGREES, rawposition.h);
 
-        telemetry.addLine(position.toString());
-        telemetry.update();
+        telemetry.addData("position", position.getX(DistanceUnit.INCH)+" "+position.getY(DistanceUnit.INCH)+" "+position.getHeading(AngleUnit.DEGREES));
         TelemetryPacket packet = new TelemetryPacket();
         packet.fieldOverlay().setFill("blue")
                 .strokeCircle(position.getX(DistanceUnit.INCH), position.getY(DistanceUnit.INCH), 5)
@@ -165,5 +164,8 @@ public class MecanumDrivetrain implements Subsystem{
 
         odometry.setPosition(new SparkFunOTOS.Pose2D(targetPosition.getX(DistanceUnit.INCH),
                 targetPosition.getY(DistanceUnit.INCH), targetPosition.getHeading(AngleUnit.DEGREES)));
+    }
+    public void calibrateIMU(){
+        odometry.calibrateImu();
     }
 }
