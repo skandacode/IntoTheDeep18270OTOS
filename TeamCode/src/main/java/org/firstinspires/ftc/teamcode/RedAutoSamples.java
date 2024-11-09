@@ -26,10 +26,10 @@ public class RedAutoSamples extends LinearOpMode {
     public static boolean yPressed=false;
     public static boolean lbPressed=false;
     enum autoStates {PREBUCKET1, BUCKET1, SCORE1,
-        PRESAMPLE1, EXTEND1, INTAKE1, PREBUCKET2, SCORE2,
-        PRESAMPLE2, EXTEND2, INTAKE2, PREBUCKET3, SCORE3,
-        PRESAMPLE3, EXTEND3, INTAKE3, PREBUCKET4, SCORE4,
-        PARK
+        PRESAMPLE1, EXTEND1, INTAKE1, PREBUCKET2, BUCKET2, SCORE2,
+        PRESAMPLE2, EXTEND2, INTAKE2, PREBUCKET3, BUCKET3, SCORE3,
+        PRESAMPLE3, EXTEND3, INTAKE3, PREBUCKET4, BUCKET4, SCORE4,
+        PREPARK, PARK
     }
 
     @Override
@@ -48,6 +48,9 @@ public class RedAutoSamples extends LinearOpMode {
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
         WayPoint prepark=new WayPoint(new Pose2D(DistanceUnit.INCH, -34, -8, AngleUnit.DEGREES, 180),
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
+        WayPoint park=new WayPoint(new Pose2D(DistanceUnit.INCH, -23, -10, AngleUnit.DEGREES, 180),
+                new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
+
 
         WayPoint presample1=new WayPoint(new Pose2D(DistanceUnit.INCH, -47, -56, AngleUnit.DEGREES, 90),
                 new Pose2D(DistanceUnit.INCH, 0.5, 0.5, AngleUnit.DEGREES, 1));
@@ -57,9 +60,9 @@ public class RedAutoSamples extends LinearOpMode {
                 new Pose2D(DistanceUnit.INCH, 0.5, 0.5, AngleUnit.DEGREES, 1));
         WayPoint sample2=new WayPoint(new Pose2D(DistanceUnit.INCH, -57, -51, AngleUnit.DEGREES, 90),
                 new Pose2D(DistanceUnit.INCH, 0.5, 0.5, AngleUnit.DEGREES, 1));
-        WayPoint presample3=new WayPoint(new Pose2D(DistanceUnit.INCH, -51, -52.3, AngleUnit.DEGREES, 124),
+        WayPoint presample3=new WayPoint(new Pose2D(DistanceUnit.INCH, -41.5, -40.5, AngleUnit.DEGREES, 155),
                 new Pose2D(DistanceUnit.INCH, 0.5, 0.5, AngleUnit.DEGREES, 1));
-        WayPoint sample3=new WayPoint(new Pose2D(DistanceUnit.INCH, -54, -45, AngleUnit.DEGREES, 120),
+        WayPoint sample3=new WayPoint(new Pose2D(DistanceUnit.INCH, -46.7, -35, AngleUnit.DEGREES, 160),
                 new Pose2D(DistanceUnit.INCH, 0.5, 0.5, AngleUnit.DEGREES, 1));
 
 
@@ -144,11 +147,11 @@ public class RedAutoSamples extends LinearOpMode {
                 .state(autoStates.PREBUCKET2)
                 .onEnter(()->drive.setTarget(bucketPos1))
                 .transition(()->drive.atTarget() && outtake.getLiftPos()>2900)
+                .state(autoStates.BUCKET2)
+                .onEnter(()->drive.setTarget(bucketPos2))
+                .transition(()->drive.atTarget())
                 .state(autoStates.SCORE2)
-                .onEnter(()->{
-                    drive.setTarget(bucketPos2);
-                    lbPressed=true;
-                })
+                .onEnter(()->lbPressed=true)
                 .transitionTimed(0.7)
 
                 .state(autoStates.PRESAMPLE2)
@@ -164,11 +167,11 @@ public class RedAutoSamples extends LinearOpMode {
                 .state(autoStates.PREBUCKET3)
                 .onEnter(()->drive.setTarget(bucketPos1))
                 .transition(()->drive.atTarget() && outtake.getLiftPos()>2900)
+                .state(autoStates.BUCKET3)
+                .onEnter(()->drive.setTarget(bucketPos2))
+                .transition(()->drive.atTarget())
                 .state(autoStates.SCORE3)
-                .onEnter(()->{
-                    drive.setTarget(bucketPos2);
-                    lbPressed=true;
-                })
+                .onEnter(()->lbPressed=true)
                 .transitionTimed(0.7)
 
                 .state(autoStates.PRESAMPLE3)
@@ -184,14 +187,23 @@ public class RedAutoSamples extends LinearOpMode {
                 .state(autoStates.PREBUCKET4)
                 .onEnter(()->drive.setTarget(bucketPos1))
                 .transition(()->drive.atTarget() && outtake.getLiftPos()>2900)
+                .state(autoStates.BUCKET4)
+                .onEnter(()->drive.setTarget(bucketPos2))
+                .transition(()->drive.atTarget())
                 .state(autoStates.SCORE4)
-                .onEnter(()->{
-                    drive.setTarget(bucketPos2);
-                    lbPressed=true;
-                })
+                .onEnter(()->lbPressed=true)
                 .transitionTimed(0.7)
-                .state(autoStates.PARK)
+                .state(autoStates.PREPARK)
                 .onEnter(()-> drive.setTarget(prepark))
+                .transition(()->drive.atTarget())
+                .state(autoStates.PARK)
+                .onEnter(()-> {
+                    drive.setTarget(park);
+                    outtake.setFlipPos(0.32);
+                    outtake.closeClaw();
+                    outtake.setWristPos(0.5);
+                })
+
                 .build();
 
         WayPoint startPoint=new WayPoint(new Pose2D(DistanceUnit.INCH, -36, -63, AngleUnit.DEGREES, 90),
