@@ -133,7 +133,7 @@ public class Intake implements Subsystem {
             }
             int[] rgbValues = getRawSensorValues();
             System.out.println(Arrays.toString(rgbValues));
-            int[] tweakedValues = new int[] {rgbValues[0]+50, rgbValues[1]-25, rgbValues[2]-100};
+            int[] tweakedValues = new int[] {rgbValues[0], rgbValues[1]-25, rgbValues[2]-100};
             if (tweakedValues[0]>tweakedValues[1] && tweakedValues[0]>tweakedValues[2]){
                 System.out.println(Arrays.toString(tweakedValues)+" Red");
                 return SampleColor.RED;
