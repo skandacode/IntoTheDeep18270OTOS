@@ -41,13 +41,13 @@ public class AutoSamples extends LinearOpMode {
 
         WayPoint bucketPos1=new WayPoint(new Pose2D(DistanceUnit.INCH, -49, -53, AngleUnit.DEGREES, 43),
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
-        WayPoint bucketPos2=new WayPoint(new Pose2D(DistanceUnit.INCH, -52, -55.5, AngleUnit.DEGREES, 43),
+        WayPoint bucketPos2=new WayPoint(new Pose2D(DistanceUnit.INCH, -50, -56, AngleUnit.DEGREES, 43),
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
         WayPoint bucketPos3=new WayPoint(new Pose2D(DistanceUnit.INCH, -52, -59, AngleUnit.DEGREES, 43),
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
         WayPoint prepark=new WayPoint(new Pose2D(DistanceUnit.INCH, -34, -8, AngleUnit.DEGREES, 180),
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
-        WayPoint park=new WayPoint(new Pose2D(DistanceUnit.INCH, -22, -8, AngleUnit.DEGREES, 180),
+        WayPoint park=new WayPoint(new Pose2D(DistanceUnit.INCH, -22, -10, AngleUnit.DEGREES, 180),
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
 
 
@@ -55,13 +55,13 @@ public class AutoSamples extends LinearOpMode {
                 new Pose2D(DistanceUnit.INCH, 0.5, 0.5, AngleUnit.DEGREES, 1));
         WayPoint sample1=new WayPoint(new Pose2D(DistanceUnit.INCH, -47, -50, AngleUnit.DEGREES, 89),
                 new Pose2D(DistanceUnit.INCH, 0.5, 0.5, AngleUnit.DEGREES, 1));
-        WayPoint presample2=new WayPoint(new Pose2D(DistanceUnit.INCH, -56, -56.5, AngleUnit.DEGREES, 90),
+        WayPoint presample2=new WayPoint(new Pose2D(DistanceUnit.INCH, -53, -56.5, AngleUnit.DEGREES, 90),
                 new Pose2D(DistanceUnit.INCH, 0.5, 0.5, AngleUnit.DEGREES, 1));
-        WayPoint sample2=new WayPoint(new Pose2D(DistanceUnit.INCH, -57, -50, AngleUnit.DEGREES, 90),
+        WayPoint sample2=new WayPoint(new Pose2D(DistanceUnit.INCH, -55, -50, AngleUnit.DEGREES, 90),
                 new Pose2D(DistanceUnit.INCH, 0.5, 0.5, AngleUnit.DEGREES, 1));
-        WayPoint presample3=new WayPoint(new Pose2D(DistanceUnit.INCH, -41.5, -40.5, AngleUnit.DEGREES, 155),
+        WayPoint presample3=new WayPoint(new Pose2D(DistanceUnit.INCH, -41.5, -41, AngleUnit.DEGREES, 155),
                 new Pose2D(DistanceUnit.INCH, 0.5, 0.5, AngleUnit.DEGREES, 1));
-        WayPoint sample3=new WayPoint(new Pose2D(DistanceUnit.INCH, -46, -35, AngleUnit.DEGREES, 160),
+        WayPoint sample3=new WayPoint(new Pose2D(DistanceUnit.INCH, -46, -36, AngleUnit.DEGREES, 160),
                 new Pose2D(DistanceUnit.INCH, 0.5, 0.5, AngleUnit.DEGREES, 1));
 
 
@@ -142,7 +142,7 @@ public class AutoSamples extends LinearOpMode {
                 .transitionTimed(1.3)
                 .state(autoStates.INTAKE1)
                 .onEnter(()->drive.setTarget(sample1))
-                .transition(()->sampleMachine.getState()== TeleopSomewhatAutoBlue.SampleStates.RETRACT)
+                .transition(()->sampleMachine.getState()!= TeleopSomewhatAutoBlue.SampleStates.DROP && sampleMachine.getState() != TeleopSomewhatAutoBlue.SampleStates.EXTEND)
                 .state(autoStates.PREBUCKET2)
                 .onEnter(()->drive.setTarget(bucketPos1))
                 .transition(()->drive.atTarget() && outtake.getLiftPos()>2850)
@@ -162,7 +162,7 @@ public class AutoSamples extends LinearOpMode {
                 .transitionTimed(1.3)
                 .state(autoStates.INTAKE2)
                 .onEnter(()->drive.setTarget(sample2))
-                .transition(()->sampleMachine.getState()== TeleopSomewhatAutoBlue.SampleStates.RETRACT)
+                .transition(()->sampleMachine.getState()!= TeleopSomewhatAutoBlue.SampleStates.DROP && sampleMachine.getState() != TeleopSomewhatAutoBlue.SampleStates.EXTEND)
                 .state(autoStates.PREBUCKET3)
                 .onEnter(()->drive.setTarget(bucketPos1))
                 .transition(()->drive.atTarget() && outtake.getLiftPos()>2850)
@@ -182,7 +182,7 @@ public class AutoSamples extends LinearOpMode {
                 .transitionTimed(1.3)
                 .state(autoStates.INTAKE3)
                 .onEnter(()->drive.setTarget(sample3))
-                .transition(()->sampleMachine.getState()== TeleopSomewhatAutoBlue.SampleStates.RETRACT)
+                .transition(()->sampleMachine.getState()!= TeleopSomewhatAutoBlue.SampleStates.DROP && sampleMachine.getState() != TeleopSomewhatAutoBlue.SampleStates.EXTEND)
                 .state(autoStates.PREBUCKET4)
                 .onEnter(()->drive.setTarget(bucketPos1))
                 .transition(()->drive.atTarget() && outtake.getLiftPos()>2850)
@@ -216,10 +216,10 @@ public class AutoSamples extends LinearOpMode {
         waitForStart();
         drive.setTarget(startPoint);
         drive.setPosition(startPoint.getPosition());
-        drive.calibrateIMU();
         sampleMachine.start();
         autoMachine.start();
         sampleMachine.setState(TeleopSomewhatAutoBlue.SampleStates.RETRACT);
+        outtake.resetEncoder();
         long prevLoop=System.nanoTime();
         while (opModeIsActive()){
             autoMachine.update();
@@ -229,6 +229,7 @@ public class AutoSamples extends LinearOpMode {
             intake.update();
             outtake.update();
             long currLoop = System.nanoTime();
+            telemetry.addData("Outtake position", outtake.getLiftPos());
             telemetry.addData("Ms per loop", (currLoop - prevLoop) / 1000000);
             prevLoop = currLoop;
             telemetry.update();

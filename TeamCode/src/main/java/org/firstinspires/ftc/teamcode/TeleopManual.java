@@ -54,7 +54,7 @@ public class TeleopManual extends LinearOpMode {
                 outtake.scorePos();
             }
             if (gamepad1.dpad_down){
-                outtake.specimenDepo();
+                outtake.specimenScorePos();
             }
             outtake.setPower(gamepad1.right_trigger-gamepad1.left_trigger+liftFF);
             if (!gamepad1.left_bumper){

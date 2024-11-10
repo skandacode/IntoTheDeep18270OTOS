@@ -82,11 +82,6 @@ public class Outtake implements Subsystem{
         setWristPos(0.50);
         closeClaw();
     }
-    public void specimenDepo(){
-        setFlipPos(0.1);
-        setWristPos(0.91);
-    }
-
     @Override
     public void update() {
         double controller_output=controller.calculate(getLiftPos());
