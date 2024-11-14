@@ -105,15 +105,19 @@ public class Outtake implements Subsystem{
         controller.setSetPoint(targetPos);
     }
     public void specimenHoldPos(){
-        setFlipPos(0.5);
+        setFlipPos(0.8);
         closeClaw();
         setWristPos(0.5);
-        setTargetPos(380);
+        setTargetPos(1350);
     }
     public void specimenScorePos(){
-        setFlipPos(0.1);
+        setFlipPos(0.6);
         setWristPos(0.5);
         closeClaw();
-        setTargetPos(380);
+        setTargetPos(1600);
+    }
+
+    public int getTargetPos() {
+        return targetPos;
     }
 }

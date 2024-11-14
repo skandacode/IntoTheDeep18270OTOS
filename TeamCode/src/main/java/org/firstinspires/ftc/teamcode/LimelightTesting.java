@@ -26,9 +26,9 @@ public class LimelightTesting extends LinearOpMode {
         limelight.start();
         while (opModeIsActive()) {
             LLResult result = limelight.getLatestResult();
-            List<LLResultTypes.ColorResult> colorResults = result.getColorResults();
-            for (LLResultTypes.ColorResult cr : colorResults) {
-                telemetry.addData("Color", "X: %.2f, Y: %.2f", cr.getTargetXDegrees(), cr.getTargetYDegrees());
+            List<LLResultTypes.FiducialResult> tagResults = result.getFiducialResults();
+            for (LLResultTypes.FiducialResult cr : tagResults) {
+                telemetry.addData("Color", "X: %.2f, Y: %.2f", cr.getRobotPoseFieldSpace());
             }
             telemetry.update();
         }

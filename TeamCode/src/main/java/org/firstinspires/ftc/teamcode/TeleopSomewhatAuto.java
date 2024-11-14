@@ -14,12 +14,11 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Outtake;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Config
 @TeleOp
-public class TeleopSomewhatAutoBlue extends LinearOpMode {
+public class TeleopSomewhatAuto extends LinearOpMode {
     Outtake outtake;
     Intake intake;
     MecanumDrivetrain drive;
@@ -28,7 +27,7 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
         IDLE, EXTEND, DROP, SENSORWAIT, SENSE, RETRACT, OPENCOVER, WAIT, CLOSE, LIFT, WRIST, OPEN, LOWERLIFT, EJECT
     }
 
-    private enum SpecimenScoreStates {IDLE, INTAKEPOS, INTAKE, CLOSE_CLAW, HOLD, SCORE, OPENCLAW, RETRACT}
+    public enum SpecimenScoreStates {IDLE, INTAKEPOS, INTAKE, CLOSE_CLAW, HOLD, SCORE, OPENCLAW, RETRACT}
 
     Intake.SampleColor targetColor = Intake.SampleColor.YELLOW;
 
@@ -135,7 +134,11 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
                     outtake.setTargetPos(0);
                     outtake.transferPos();
                 }).transition(() -> (outtake.atTarget() || gamepad1.y), SampleStates.IDLE).build();
-        StateMachine specimenScorer = new StateMachineBuilder().state(SpecimenScoreStates.IDLE).transition(() -> gamepad1.dpad_up).state(SpecimenScoreStates.INTAKEPOS).onEnter(() -> {
+        StateMachine specimenScorer = new StateMachineBuilder()
+                .state(SpecimenScoreStates.IDLE)
+                .transition(() -> gamepad1.dpad_up)
+                .state(SpecimenScoreStates.INTAKEPOS)
+                .onEnter(() -> {
                     outtake.scorePos();
                     outtake.openClawWide();
                     outtake.setTargetPos(200);
@@ -158,8 +161,18 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
                 .transitionTimed(0.2)
                 .state(SpecimenScoreStates.RETRACT)
                 .onEnter(() -> outtake.transferPos())
-                .transition(() -> outtake.atTarget(), SpecimenScoreStates.IDLE)
+                .transition(() -> (outtake.atTarget() || gamepad1.dpad_up), SpecimenScoreStates.IDLE)
                 .build();
+
+        while (opModeInInit()){
+            if (gamepad1.a){
+                allianceColor = Intake.SampleColor.BLUE;
+            }
+            if (gamepad1.b){
+                allianceColor = Intake.SampleColor.RED;
+            }
+        }
+
         waitForStart();
         outtake.transferPos();
         outtake.resetEncoder();
@@ -171,13 +184,16 @@ public class TeleopSomewhatAutoBlue extends LinearOpMode {
             for (LynxModule hub : allHubs) {
                 hub.clearBulkCache();
             }
-            boolean currSampleColorToggle = gamepad1.dpad_down;
+            boolean currSampleColorToggle = gamepad1.right_trigger>0.5;
             if (currSampleColorToggle && !prevSampleColorToggle) {
                 if (targetColor == Intake.SampleColor.YELLOW) {
                     targetColor = allianceColor;
                 } else if (targetColor == allianceColor) {
                     targetColor = Intake.SampleColor.YELLOW;
                 }
+            }
+            if (gamepad1.share && outtake.getTargetPos()==0){
+                outtake.resetEncoder();
             }
             if (gamepad1.x) {
                 if (sampleMachine.getState() == SampleStates.EXTEND || sampleMachine.getState() == SampleStates.DROP) {

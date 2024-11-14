@@ -38,9 +38,9 @@ public class MecanumDrivetrain implements Subsystem{
     Telemetry telemetry;
     FtcDashboard dashboard;
 
-    SparkFunOTOS odometry;
+    public SparkFunOTOS odometry;
 
-    Pose2D position;
+    public Pose2D position;
 
     public MecanumDrivetrain(HardwareMap hwMap, Telemetry telemetry, FtcDashboard dashboard){
         this.telemetry=telemetry;

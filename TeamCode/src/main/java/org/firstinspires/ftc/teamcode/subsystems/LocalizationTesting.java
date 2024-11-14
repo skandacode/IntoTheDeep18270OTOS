@@ -21,7 +21,7 @@ public class LocalizationTesting extends LinearOpMode {
         FtcDashboard dashboard = FtcDashboard.getInstance();
         telemetry= new MultipleTelemetry(telemetry, dashboard.getTelemetry());
         drive=new MecanumDrivetrain(hardwareMap, telemetry, dashboard);
-        WayPoint startPoint=new WayPoint(new Pose2D(DistanceUnit.INCH, -36, -63, AngleUnit.DEGREES, 90),
+        WayPoint startPoint=new WayPoint(new Pose2D(DistanceUnit.INCH, 2, -63, AngleUnit.DEGREES, 90),
                 new Pose2D(DistanceUnit.INCH, 0.5, 0.5, AngleUnit.DEGREES, 0.5));
         waitForStart();
         drive.setTarget(startPoint);

@@ -11,7 +11,7 @@ import com.sfdev.assembly.state.StateMachineBuilder;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.TeleopSomewhatAutoBlue;
+import org.firstinspires.ftc.teamcode.TeleopSomewhatAuto;
 import org.firstinspires.ftc.teamcode.pathing.WayPoint;
 
 @Config
@@ -30,22 +30,22 @@ public class MecanumDrivetrainTesting extends LinearOpMode {
         outtake= new Outtake(hardwareMap, telemetry);
 
         StateMachine sampleMachine = new StateMachineBuilder()
-                .state(TeleopSomewhatAutoBlue.SampleStates.IDLE)
+                .state(TeleopSomewhatAuto.SampleStates.IDLE)
                 .onEnter(() -> {
                     intake.retract();
                     intake.setPower(0);
                 })
                 .transition(() -> gamepad1.y)
-                .state(TeleopSomewhatAutoBlue.SampleStates.EXTEND)
+                .state(TeleopSomewhatAuto.SampleStates.EXTEND)
                 .onEnter(()->intake.setExtended(true))
                 .transitionTimed(0.1)
-                .state(TeleopSomewhatAutoBlue.SampleStates.DROP)
+                .state(TeleopSomewhatAuto.SampleStates.DROP)
                 .onEnter(() -> {
                     intake.intakePosition();
                     intake.setPower(0.8);
                 })
                 .transition(()->intake.getDistance()<4)
-                .state(TeleopSomewhatAutoBlue.SampleStates.RETRACT)
+                .state(TeleopSomewhatAuto.SampleStates.RETRACT)
                 .onEnter(() -> {
                     intake.retract();
                     intake.setCover(true);
@@ -53,35 +53,35 @@ public class MecanumDrivetrainTesting extends LinearOpMode {
                     outtake.transferPos();
                 })
                 .transitionTimed(0.2)
-                .state(TeleopSomewhatAutoBlue.SampleStates.OPENCOVER)
+                .state(TeleopSomewhatAuto.SampleStates.OPENCOVER)
                 .onEnter(() -> intake.setCover(false))
                 .transition(() -> intake.isDone())
 
-                .state(TeleopSomewhatAutoBlue.SampleStates.WAIT)
+                .state(TeleopSomewhatAuto.SampleStates.WAIT)
                 .onEnter(() -> intake.setPower(0.4))
                 .transitionTimed(0.7)
 
-                .state(TeleopSomewhatAutoBlue.SampleStates.CLOSE)
+                .state(TeleopSomewhatAuto.SampleStates.CLOSE)
                 .onEnter(() -> outtake.closeClaw())
                 .transitionTimed(0.2)
 
-                .state(TeleopSomewhatAutoBlue.SampleStates.LIFT)
+                .state(TeleopSomewhatAuto.SampleStates.LIFT)
                 .onEnter(() -> outtake.setTargetPos(3000))
                 .transitionTimed(0.2)
 
-                .state(TeleopSomewhatAutoBlue.SampleStates.WRIST).onEnter(() -> {
+                .state(TeleopSomewhatAuto.SampleStates.WRIST).onEnter(() -> {
                     outtake.scorePos();
                     intake.setPower(0);
                     intake.setPower(-0.2);
                 })
                 .transition(() -> gamepad1.left_bumper)
 
-                .state(TeleopSomewhatAutoBlue.SampleStates.OPEN).onEnter(() -> outtake.openClaw()).transitionTimed(1.5)
+                .state(TeleopSomewhatAuto.SampleStates.OPEN).onEnter(() -> outtake.openClaw()).transitionTimed(1.5)
 
-                .state(TeleopSomewhatAutoBlue.SampleStates.LOWERLIFT).onEnter(() -> {
+                .state(TeleopSomewhatAuto.SampleStates.LOWERLIFT).onEnter(() -> {
                     outtake.setTargetPos(0);
                     outtake.transferPos();
-                }).transition(() -> (outtake.atTarget() || gamepad1.y), TeleopSomewhatAutoBlue.SampleStates.IDLE).build();
+                }).transition(() -> (outtake.atTarget() || gamepad1.y), TeleopSomewhatAuto.SampleStates.IDLE).build();
 
 
         WayPoint bucketPos1=new WayPoint(new Pose2D(DistanceUnit.INCH, -48, -56, AngleUnit.DEGREES, 43),
@@ -113,7 +113,7 @@ public class MecanumDrivetrainTesting extends LinearOpMode {
         drive.setPosition(startPoint.getPosition());
         drive.calibrateIMU();
         sampleMachine.start();
-        sampleMachine.setState(TeleopSomewhatAutoBlue.SampleStates.RETRACT);
+        sampleMachine.setState(TeleopSomewhatAuto.SampleStates.RETRACT);
         while (opModeIsActive()){
             drive.update();
             drive.updatePIDS();
