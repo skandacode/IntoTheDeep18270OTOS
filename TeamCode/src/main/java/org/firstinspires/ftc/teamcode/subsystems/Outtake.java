@@ -28,11 +28,11 @@ public class Outtake implements Subsystem{
         wrist=hwMap.servo.get("wrist");
         claw=hwMap.servo.get("claw");
 
-        leftLift.resetEncoder();
+        resetEncoder();
 
         controller = new PIDFController(0.01, 0, 0, 0);
 
-        controller.setTolerance(10);
+        controller.setTolerance(30);
 
         this.telemetry=telemetry;
     }
@@ -85,16 +85,8 @@ public class Outtake implements Subsystem{
     @Override
     public void update() {
         double controller_output=controller.calculate(getLiftPos());
-
-//        if (getLiftPos()>targetPos){
-//            controller_output-=0.05;
-//        }
-//        else if (getLiftPos()<targetPos){
-//            controller_output+=0.05;
-//        }
         telemetry.addData("Outtake applied power", controller_output);
         setPower(controller_output);
-
     }
     public boolean atTarget(){
         return controller.atSetPoint();
@@ -119,5 +111,8 @@ public class Outtake implements Subsystem{
 
     public int getTargetPos() {
         return targetPos;
+    }
+    public double getCurrent(){
+        return rightLift.getCurrent();
     }
 }

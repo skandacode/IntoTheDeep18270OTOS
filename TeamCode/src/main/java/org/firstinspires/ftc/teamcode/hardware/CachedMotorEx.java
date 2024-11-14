@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+
 public class CachedMotorEx extends MotorEx {
     double prevPower=0;
 
@@ -30,5 +32,8 @@ public class CachedMotorEx extends MotorEx {
             super.set(p);
             this.prevPower=p;
         }
+    }
+    public double getCurrent(){
+        return super.motorEx.getCurrent(CurrentUnit.AMPS);
     }
 }

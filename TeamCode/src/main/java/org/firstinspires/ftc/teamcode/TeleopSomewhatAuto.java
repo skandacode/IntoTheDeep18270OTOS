@@ -174,8 +174,15 @@ public class TeleopSomewhatAuto extends LinearOpMode {
         }
 
         waitForStart();
-        outtake.transferPos();
+        do{
+            outtake.setPower(-1);
+            sleep(100);
+        }while(opModeIsActive() && Math.abs(outtake.getCurrent())<5);
+        for (LynxModule hub : allHubs) {
+            hub.clearBulkCache();
+        }
         outtake.resetEncoder();
+        outtake.transferPos();
         sampleMachine.start();
         specimenScorer.start();
         boolean prevSampleColorToggle = false;

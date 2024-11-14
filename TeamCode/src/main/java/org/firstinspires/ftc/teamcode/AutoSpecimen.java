@@ -68,7 +68,7 @@ public class AutoSpecimen extends LinearOpMode {
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
         WayPoint specimenGrabForward=new WayPoint(new Pose2D(DistanceUnit.INCH, 30, -53, AngleUnit.DEGREES, 90),
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
-        WayPoint specimenGrab2=new WayPoint(new Pose2D(DistanceUnit.INCH, 30, -51, AngleUnit.DEGREES, 90),
+        WayPoint specimenGrab2=new WayPoint(new Pose2D(DistanceUnit.INCH, 30, -50, AngleUnit.DEGREES, 90),
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
         WayPoint specimenGrabForward2=new WayPoint(new Pose2D(DistanceUnit.INCH, 30, -54, AngleUnit.DEGREES, 90),
                 new Pose2D(DistanceUnit.INCH, 1, 1, AngleUnit.DEGREES, 2));
@@ -106,6 +106,7 @@ public class AutoSpecimen extends LinearOpMode {
                 .state(TeleopSomewhatAuto.SpecimenScoreStates.RETRACT)
                 .onEnter(() -> outtake.transferPos())
                 .transition(() -> outtake.atTarget(), TeleopSomewhatAuto.SpecimenScoreStates.INTAKEPOS)
+                .transitionTimed(3, TeleopSomewhatAuto.SpecimenScoreStates.INTAKEPOS)
                 .build();
 
         StateMachine autoMachine = new StateMachineBuilder()
@@ -221,6 +222,8 @@ public class AutoSpecimen extends LinearOpMode {
             long currLoop = System.nanoTime();
             telemetry.addData("Outtake position", outtake.getLiftPos());
             telemetry.addData("State", autoMachine.getState());
+            telemetry.addData("Specimen State", specimenMachine.getState());
+
             telemetry.addData("Ms per loop", (currLoop - prevLoop) / 1000000);
             prevLoop = currLoop;
             telemetry.update();
