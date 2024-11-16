@@ -36,6 +36,10 @@ public class TeleopSomewhatAuto extends LinearOpMode {
     public static Intake.SampleColor allianceColor= Intake.SampleColor.BLUE;
     Intake.SampleColor currentSense= Intake.SampleColor.NONE;
 
+    boolean hanging=false;
+    boolean pullingdown=false;
+
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -167,10 +171,14 @@ public class TeleopSomewhatAuto extends LinearOpMode {
         while (opModeInInit()){
             if (gamepad1.a){
                 allianceColor = Intake.SampleColor.BLUE;
+                gamepad1.setLedColor(0, 0, 1, 1000);
             }
             if (gamepad1.b){
                 allianceColor = Intake.SampleColor.RED;
+                gamepad1.setLedColor(1, 0, 0, 1000);
             }
+            telemetry.addData("Alliance Color", allianceColor.toString());
+            telemetry.update();
         }
 
         waitForStart();
@@ -222,16 +230,39 @@ public class TeleopSomewhatAuto extends LinearOpMode {
                 outtake.closeClaw();
                 sampleMachine.setState(SampleStates.CLOSE);
             }
-            sampleMachine.update();
-            specimenScorer.update();
+            if (gamepad1.left_stick_button){
+                hanging=true;
+                intake.retract();
+                intake.setPower(0);
+                outtake.transferPos();
+                outtake.setTargetPos(2900);
+            }
+            if (gamepad1.right_stick_button && hanging){
+                pullingdown=true;
+            }
+            if (pullingdown){
+                if (outtake.getLiftPos()>2000){
+                    outtake.setPower(-1);
+                }else{
+                    outtake.setPower(-0.5);
+                }
+            }
+            if (!hanging) {
+                sampleMachine.update();
+                specimenScorer.update();
+            }
             intake.update();
-            outtake.update();
+            if (!pullingdown){
+                outtake.update();
+            }
             telemetry.addData("target color", targetColor.toString());
             telemetry.addData("State sample", sampleMachine.getState());
             telemetry.addData("Specimen sample", specimenScorer.getState());
 
             //telemetry.addData("Intake color", Arrays.toString(intake.getRawSensorValues()));
             //telemetry.addData("Intake distance", intake.getDistance());
+            telemetry.addData("hanging?", hanging);
+            telemetry.addData("pulling down?", pullingdown);
 
             telemetry.addData("Outtake Pos", outtake.getLiftPos());
             telemetry.addData("Extendo Pos", intake.getExtendoMotorPos());
