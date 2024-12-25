@@ -54,6 +54,18 @@ public class MecanumDrivetrain implements Subsystem{
         leftBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
+
+        odometry = hwMap.get(SparkFunOTOS.class, "otos");
+        odometry.calibrateImu();
+        odometry.setLinearScalar(1.0726534030253347);
+        odometry.setAngularScalar(0.9885441764832054);
+        odometry.setLinearUnit(DistanceUnit.INCH);
+        odometry.setAngularUnit(AngleUnit.DEGREES);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(-5, 0, 270);
+        odometry.setOffset(offset);
+        odometry.resetTracking();
+
+        odometry.setPosition(new SparkFunOTOS.Pose2D());
     }
 
     public void setRawPowers(double frontleft, double frontright, double backleft, double backright){
@@ -68,8 +80,8 @@ public class MecanumDrivetrain implements Subsystem{
 
         }
         leftFront.set(-frontleft);
-        leftBack.set(-backleft);
-        rightFront.set(frontright);
+        leftBack.set(backleft);
+        rightFront.set(-frontright);
         rightBack.set(backright);
     }
     public void setWeightedPowers(double front, double strafe, double heading){
@@ -100,7 +112,7 @@ public class MecanumDrivetrain implements Subsystem{
         headingController.setTolerance(target.getTolerance().getHeading(AngleUnit.RADIANS));
     }
     public void update() {
-        SparkFunOTOS.Pose2D rawposition= new SparkFunOTOS.Pose2D();
+        SparkFunOTOS.Pose2D rawposition= odometry.getPosition();
         position=new Pose2D(DistanceUnit.INCH, rawposition.x, rawposition.y, AngleUnit.DEGREES, rawposition.h);
 
         telemetry.addData("position", position.getX(DistanceUnit.INCH)+" "+position.getY(DistanceUnit.INCH)+" "+position.getHeading(AngleUnit.DEGREES));
@@ -114,7 +126,7 @@ public class MecanumDrivetrain implements Subsystem{
         dashboard.sendTelemetryPacket(packet);
     }
     public SparkFunOTOS.Pose2D getVelocity(){
-        return new SparkFunOTOS.Pose2D();
+        return odometry.getVelocity();
     }
     public void updatePIDS(){
         double heading=position.getHeading(AngleUnit.RADIANS);
